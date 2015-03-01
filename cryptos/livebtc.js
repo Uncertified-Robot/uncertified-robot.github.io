@@ -4,6 +4,9 @@ var sub_blocks = false;
 
 var connection;
 var ticker;
+var alertSound = 1;//0=none, 1=pling.wav, 2=pling2.wav, 3=pling3.wav and 4=pling4.wav
+
+var alertSounds = ["","../sounds/pling.wav","../sounds/pling2.wav","../sounds/pling3.wav","../sounds/pling.4wav"]; 
 
 var msgs = 0;
 
@@ -78,9 +81,10 @@ function addressMessage(e, p, adr) {
         + "subscribed address <a href=\"http://blockchain.info/address/" + adr + "\">"
         + adr + "</a> "
         + "sent &#3647;<b>" + roundTo(btc / 100000000, 8)
-        + "</b>from <b>" + p.x.vin_sz
+        + "</b> from <b>" + p.x.vin_sz
         + "</b> input(s) to <b>" + p.x.vout_sz + "</b> output(s)";
-
+        var snd = new Audio(alertSounds[alertSound]);
+        snd.play();
     return [t, "address"];
 }
 
