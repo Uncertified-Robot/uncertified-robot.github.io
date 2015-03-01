@@ -5,6 +5,8 @@ var sub_blocks = false;
 var connection;
 var ticker;
 
+var msgs = 0;
+
 // Add size leading zeros to num
 function pad(num, size) {
     var s = num+"";
@@ -60,6 +62,10 @@ function dispatchTransaction(e, p) {
 
 // Generate message to and from an adress inside sub_addresses
 function addressMessage(e, p, adr) {
+    msgs+=1;
+        if(Math.floor(msgs/50)*50 == msgs && msgs != 0){
+    addMessage(timeStamp(),"info", '<iframe scrolling="no" style="border: 0; width: 728px; height: 90px;" src="http://coinurl.com/get.php?id=34335"></iframe>');
+}
     var sh = p.x.hash.substr(0,5) + "&hellip;" + p.x.hash.substr(-5,5);
 
     var btc=0;
@@ -80,6 +86,10 @@ function addressMessage(e, p, adr) {
 
 // Generate message for new unconfirmed transactions
 function unconfMessage(e, p) {
+    msgs+=1;
+        if(Math.floor(msgs/50)*50 == msgs && msgs != 0){
+    addMessage(timeStamp(),"info", '<iframe scrolling="no" style="border: 0; width: 728px; height: 90px;" src="http://coinurl.com/get.php?id=34335"></iframe>');
+}
     if (!sub_unconf)
         return;
     var sh = p.x.hash.substr(0,5) + "&hellip;" + p.x.hash.substr(-5,5);
@@ -98,17 +108,22 @@ function unconfMessage(e, p) {
 
 // Generate message for new blocks
 function blocksMessage(e, p) {
+    msgs+=1;
+        if(Math.floor(msgs/50)*50 == msgs && msgs != 0){
+    addMessage(timeStamp(), "info", '<iframe scrolling="no" style="border: 0; width: 728px; height: 90px;" src="http://coinurl.com/get.php?id=34335"></iframe>');
+}
     if (!sub_blocks)
         return;
     var t = "<a href=\"http://blockchain.info/block/" + p.x.hash
-        + "\">Block #" + p.x.height + "</a> mined by <b>" + p.x.miner
-        + "</b> with <b>" + p.x.n_tx + "</b> transaction(s), difficulty of <b>" + roundTo(p.x.difficulty, 5)
-        + "</b> (<b>" + p.x.bits + "</b> bits) with &#3647;<b>" + roundTo(p.x.reward / 100000000, 8) + "</b> reward";
+        + "\">Block #" + p.x.height + "</a> mined <b>"
+        + "</b> with <b>" + p.x.nTx + "</b> transaction(s)"
+        + ", <b>" + p.x.bits + "</b> bits with &#3647;<b>" + roundTo(p.x.reward / 100000000, 8) + "</b> reward";
     return [t, "block"];
 }
 
 // Add a new message to the ticker
 function addMessage(time, cls, text) {
+    
     //if (ticker[0].hasChildNodes())
     //    $("<hr>").appendTo(ticker)
 
