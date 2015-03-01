@@ -45,14 +45,6 @@ body, html {
 }
 
 
-h1 {
-    font-size: 8rem;
-    color: #333;
-
-    -webkit-animation: blink 1s ease-out 0s infinite alternate;
-    animation: blink 1s;
-}
-
 a {
     color: #0070bb;
     text-decoration: none;
@@ -78,18 +70,15 @@ ul li {
 
 .prjct {
     border:1px inset;
-    width:512px;
     height:128px;
     
 }
+
+
 
 .prjctImg {
     border:1px inset;
     width:125px;
     height:125px;
-    float:left;
-    
-    
-    
-    
+    float:left;  
 }
