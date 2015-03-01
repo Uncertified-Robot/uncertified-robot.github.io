@@ -121,7 +121,7 @@ function blocksMessage(e, p) {
     var t = "<a href=\"http://blockchain.info/block/" + p.x.hash
         + "\">Block #" + p.x.height + "</a> mined <b>"
         + "</b> with <b>" + p.x.nTx + "</b> transaction(s)"
-        + ", <b>" + p.x.bits + "</b> bits with &#3647;<b>" + roundTo(p.x.reward / 100000000, 8) + "</b> reward";
+        + ", (<b>" + p.x.bits + "</b> bits) with &#3647;<b>" + roundTo(p.x.reward / 100000000, 8) + "</b> reward";
     return [t, "block"];
 }
 
