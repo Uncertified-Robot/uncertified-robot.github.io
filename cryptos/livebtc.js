@@ -7,7 +7,7 @@ var ticker;
 var alertSound = 1;//0=none, 1=pling.wav, 2=pling2.wav, 3=pling3.wav and 4=pling4.wav
 
 var alertSounds = ["","../sounds/pling.wav","../sounds/pling2.wav","../sounds/pling3.wav","../sounds/pling.4wav"]; 
-
+var btcusd=0;
 var msgs = 0;
 var debug = false;
 // Add size leading zeros to num
@@ -20,7 +20,8 @@ function pad(num, size) {
 // Round to a specific number of decimal points
 function roundTo(num, prec) {
     var n = Math.pow(10, prec);
-    return Math.round(num * n) / n
+    var sat = Math.round(num * n) / n;
+    return sat.toFixed(8)
 }
 
 // HH:MM:SS timestamp for the messages
@@ -308,6 +309,7 @@ rateboxGetRate = function() {
           var ticker = $.parseJSON(jsonp.query.results.body.p);
           if (ticker) {
             $("#rate").html(parseFloat(ticker.last).toFixed(2));
+            btcusd=parseFloat(ticker.last).toFixed(2);
           } else {
             rateboxTimeout = setTimeout(rateboxGetRate, 3000);
           }
