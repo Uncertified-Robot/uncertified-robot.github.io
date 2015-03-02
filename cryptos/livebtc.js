@@ -9,7 +9,14 @@ var alertSound = 1;//0=none, 1=pling.wav, 2=pling2.wav, 3=pling3.wav and 4=pling
 var alertSounds = ["","../sounds/pling.wav","../sounds/pling2.wav","../sounds/pling3.wav","../sounds/pling.4wav"]; 
 var btcusd=0;
 var msgs = 0;
-var debug = false;
+
+
+var ads = {};
+ads.enabled=true;
+ads.frequency=100;
+ads.ad='<iframe scrolling="no" style="border: 0; width: 728px; height: 90px;" src="http://coinurl.com/get.php?id=34335"></iframe>';
+
+
 // Add size leading zeros to num
 function pad(num, size) {
     var s = num+"";
@@ -67,9 +74,9 @@ function dispatchTransaction(e, p) {
 // Generate message to and from an adress inside sub_addresses
 function addressMessage(e, p, adr) {
     msgs+=1;
-    if(debug==false){
-        if(Math.floor(msgs/50)*50 == msgs && msgs != 0){
-    addMessage(timeStamp(),"info", '<iframe scrolling="no" style="border: 0; width: 728px; height: 90px;" src="http://coinurl.com/get.php?id=34335"></iframe>');
+    if(ads.enabled==true){
+        if(Math.floor(msgs/ads.frequency)*ads.frequency == msgs && msgs != 0){
+    addMessage(timeStamp(),"info", ads.ad);
 }
 }
     var sh = p.x.hash.substr(0,5) + "&hellip;" + p.x.hash.substr(-5,5);
@@ -95,9 +102,9 @@ function addressMessage(e, p, adr) {
 // Generate message for new unconfirmed transactions
 function unconfMessage(e, p) {
     msgs+=1;
-    if(debug==false){
-        if(Math.floor(msgs/50)*50 == msgs && msgs != 0){
-    addMessage(timeStamp(),"info", '<iframe scrolling="no" style="border: 0; width: 728px; height: 90px;" src="http://coinurl.com/get.php?id=34335"></iframe>');
+    if(ads.enabled=true){
+        if(Math.floor(msgs/ads.frequency)*ads.frequency == msgs && msgs != 0){
+    addMessage(timeStamp(),"info", ads.ad);
 }
 }
     if (!sub_unconf)
@@ -121,9 +128,9 @@ function unconfMessage(e, p) {
 // Generate message for new blocks
 function blocksMessage(e, p) {
     msgs+=1;
-    if(debug==false){
-        if(Math.floor(msgs/50)*50 == msgs && msgs != 0){
-    addMessage(timeStamp(),"info", '<iframe scrolling="no" style="border: 0; width: 728px; height: 90px;" src="http://coinurl.com/get.php?id=34335"></iframe>');
+    if(ads.enabled==true){
+        if(Math.floor(msgs/ads.frequency)*ads.frequency == msgs && msgs != 0){
+    addMessage(timeStamp(),"info", ads.ad);
 }
 }
     if (!sub_blocks)
@@ -309,7 +316,6 @@ rateboxGetRate = function() {
           var ticker = $.parseJSON(jsonp.query.results.body.p);
           if (ticker) {
             $("#rate").html(parseFloat(ticker.last).toFixed(2));
-            btcusd=parseFloat(ticker.last).toFixed(2);
           } else {
             rateboxTimeout = setTimeout(rateboxGetRate, 3000);
           }
