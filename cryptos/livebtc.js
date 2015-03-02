@@ -35,8 +35,8 @@ function roundTo(num, prec) {
 function timeStamp() {
     var now = new Date();
     return pad(now.getHours(), 2) + ":"
-        + pad(now.getMinutes(), 2) + ":"
-        + pad(now.getSeconds(), 2);
+    + pad(now.getMinutes(), 2) + ":"
+    + pad(now.getSeconds(), 2);
 }
 
 // Generate message for a status event
@@ -44,12 +44,12 @@ function statusMessage(e, p) {
     switch (p.msg) {
         case "welcome":
             return; //["Connected successfully", "success"];
-        case "subscribed":
+            case "subscribed":
             return; //["Subscription added", "info"];
-        default:
+            default:
             return ["Status: " + p.msg, "info"];
+        }
     }
-}
 
 // Either return the result of addressMessage or unconfMessage depending on the inputs
 function dispatchTransaction(e, p) {
@@ -76,9 +76,9 @@ function addressMessage(e, p, adr) {
     msgs+=1;
     if(ads.enabled==true){
         if(Math.floor(msgs/ads.frequency)*ads.frequency == msgs && msgs != 0){
-    addMessage(timeStamp(),"info", ads.ad);
-}
-}
+            addMessage(timeStamp(),"info", ads.ad);
+        }
+    }
     var sh = p.x.hash.substr(0,5) + "&hellip;" + p.x.hash.substr(-5,5);
 
     var btc=0;
@@ -86,8 +86,8 @@ function addressMessage(e, p, adr) {
         btc+=p.x.inputs[i].prev_out.value;
     };
     if(p.x.vin_sz > 1){plural="s"}else{plural=""}
-    if(p.x.vout_sz > 1){plural2="s"}else{plural2=""}    
-    var t = "<a href=\"http://blockchain.info/tx/" + p.x.hash
+        if(p.x.vout_sz > 1){plural2="s"}else{plural2=""}    
+            var t = "<a href=\"http://blockchain.info/tx/" + p.x.hash
         + "\">Transaction " + sh + "</a> outgoing from "
         + "subscribed address <a href=\"http://blockchain.info/address/" + adr + "\">"
         + adr + "</a> "
@@ -96,17 +96,17 @@ function addressMessage(e, p, adr) {
         + "</b> input" + plural + " to <b>" + p.x.vout_sz + "</b> output"+plural2;
         var snd = new Audio(alertSounds[alertSound]);
         snd.play();
-    return [t, "address"];
-}
+        return [t, "address"];
+    }
 
 // Generate message for new unconfirmed transactions
 function unconfMessage(e, p) {
     msgs+=1;
     if(ads.enabled=true){
         if(Math.floor(msgs/ads.frequency)*ads.frequency == msgs && msgs != 0){
-    addMessage(timeStamp(),"info", ads.ad);
-}
-}
+            addMessage(timeStamp(),"info", ads.ad);
+        }
+    }
     if (!sub_unconf)
         return;
     var sh = p.x.hash.substr(0,5) + "&hellip;" + p.x.hash.substr(-5,5);
@@ -116,30 +116,30 @@ function unconfMessage(e, p) {
         btc+=p.x.inputs[i].prev_out.value;
     };
     if(p.x.vin_sz > 1){plural="s"}else{plural=""}
-    if(p.x.vout_sz > 1){plural2="s"}else{plural2=""}  
-    var t = "<a href=\"http://blockchain.info/tx/" + p.x.hash
+        if(p.x.vout_sz > 1){plural2="s"}else{plural2=""}  
+            var t = "<a href=\"http://blockchain.info/tx/" + p.x.hash
         + "\">Transaction " + sh + "</a> sent &#3647;<b>" + roundTo(btc / 100000000, 8)
         + " from <b>" + p.x.vin_sz
         + "</b> input" + plural + " to <b>" + p.x.vout_sz + "</b> output"+plural2;
 
-    return [t, "unconf"];
-}
+        return [t, "unconf"];
+    }
 
 // Generate message for new blocks
 function blocksMessage(e, p) {
     msgs+=1;
     if(ads.enabled==true){
         if(Math.floor(msgs/ads.frequency)*ads.frequency == msgs && msgs != 0){
-    addMessage(timeStamp(),"info", ads.ad);
-}
-}
+            addMessage(timeStamp(),"info", ads.ad);
+        }
+    }
     if (!sub_blocks)
         return;
     if( p.x.nTx>1){plural="s"}else{plural=""}
-    var t = "<a href=\"http://blockchain.info/block/" + p.x.hash
-        + "\">Block #" + p.x.height + "</a> was mined <b>"
-        + "</b> with <b>" + p.x.nTx + "</b> transaction"+plural
-        + " (<b>" + p.x.bits + "</b> bits) with a &#3647;<b>" + roundTo(p.x.reward / 100000000, 8) + "</b> reward";
+        var t = "<a href=\"http://blockchain.info/block/" + p.x.hash
+    + "\">Block #" + p.x.height + "</a> was mined <b>"
+    + "</b> with <b>" + p.x.nTx + "</b> transaction"+plural
+    + " (<b>" + p.x.bits + "</b> bits) with a &#3647;<b>" + roundTo(p.x.reward / 100000000, 8) + "</b> reward";
     return [t, "block"];
 }
 
@@ -179,13 +179,13 @@ function createSocket() {
         var tmp;
         switch (p.op) {
             case "status":
-                tmp = statusMessage(e, p); break;
+            tmp = statusMessage(e, p); break;
             case "utx":
-                tmp = dispatchTransaction(e, p); break;
+            tmp = dispatchTransaction(e, p); break;
             case "block":
-                tmp = blocksMessage(e, p); break;
+            tmp = blocksMessage(e, p); break;
             default:
-                return;
+            return;
         }
 
         if (!tmp)
@@ -232,6 +232,7 @@ function updateSubs() {
         $("#subbut_address").text("Address");
         $("#subbut_address").css({"text-decoration": "none"});
     }
+
 }
 
 $(function(e) {
@@ -297,7 +298,7 @@ $(function(e) {
 $(window).bind("unload", function() {
     connection.close();
     if (localStorage) {
-            var livebtc = {
+        var livebtc = {
             sub_blocks: sub_blocks,
             sub_addresses: sub_addresses,
             sub_unconf: sub_unconf
@@ -316,9 +317,10 @@ rateboxGetRate = function() {
           var ticker = $.parseJSON(jsonp.query.results.body.p);
           if (ticker) {
             $("#rate").html(parseFloat(ticker.last).toFixed(2));
-          } else {
+        } else {
             rateboxTimeout = setTimeout(rateboxGetRate, 3000);
-          }
-        });
-};
-rateboxGetRate();
+        }
+    });
+    };
+    rateboxGetRate();
+
