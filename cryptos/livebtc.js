@@ -9,7 +9,7 @@ var alertSound = 1;//0=none, 1=pling.wav, 2=pling2.wav, 3=pling3.wav and 4=pling
 var alertSounds = ["","../sounds/pling.wav","../sounds/pling2.wav","../sounds/pling3.wav","../sounds/pling.4wav"]; 
 
 var msgs = 0;
-
+var debug = false;
 // Add size leading zeros to num
 function pad(num, size) {
     var s = num+"";
@@ -66,8 +66,10 @@ function dispatchTransaction(e, p) {
 // Generate message to and from an adress inside sub_addresses
 function addressMessage(e, p, adr) {
     msgs+=1;
+    if(debug==false){
         if(Math.floor(msgs/50)*50 == msgs && msgs != 0){
     addMessage(timeStamp(),"info", '<iframe scrolling="no" style="border: 0; width: 728px; height: 90px;" src="http://coinurl.com/get.php?id=34335"></iframe>');
+}
 }
     var sh = p.x.hash.substr(0,5) + "&hellip;" + p.x.hash.substr(-5,5);
 
@@ -75,14 +77,15 @@ function addressMessage(e, p, adr) {
     for (var i = p.x.inputs.length - 1; i >= 0; i--) {
         btc+=p.x.inputs[i].prev_out.value;
     };
-
+    if(p.x.vin_sz > 1){plural="s"}else{plural=""}
+    if(p.x.vout_sz > 1){plural2="s"}else{plural2=""}    
     var t = "<a href=\"http://blockchain.info/tx/" + p.x.hash
         + "\">Transaction " + sh + "</a> outgoing from "
         + "subscribed address <a href=\"http://blockchain.info/address/" + adr + "\">"
         + adr + "</a> "
         + "sent &#3647;<b>" + roundTo(btc / 100000000, 8)
         + "</b> from <b>" + p.x.vin_sz
-        + "</b> input(s) to <b>" + p.x.vout_sz + "</b> output(s)";
+        + "</b> input" + plural + " to <b>" + p.x.vout_sz + "</b> output"+plural2;
         var snd = new Audio(alertSounds[alertSound]);
         snd.play();
     return [t, "address"];
@@ -91,8 +94,10 @@ function addressMessage(e, p, adr) {
 // Generate message for new unconfirmed transactions
 function unconfMessage(e, p) {
     msgs+=1;
+    if(debug==false){
         if(Math.floor(msgs/50)*50 == msgs && msgs != 0){
     addMessage(timeStamp(),"info", '<iframe scrolling="no" style="border: 0; width: 728px; height: 90px;" src="http://coinurl.com/get.php?id=34335"></iframe>');
+}
 }
     if (!sub_unconf)
         return;
@@ -102,10 +107,12 @@ function unconfMessage(e, p) {
     for (var i = p.x.inputs.length - 1; i >= 0; i--) {
         btc+=p.x.inputs[i].prev_out.value;
     };
+    if(p.x.vin_sz > 1){plural="s"}else{plural=""}
+    if(p.x.vout_sz > 1){plural2="s"}else{plural2=""}  
     var t = "<a href=\"http://blockchain.info/tx/" + p.x.hash
         + "\">Transaction " + sh + "</a> sent &#3647;<b>" + roundTo(btc / 100000000, 8)
         + " from <b>" + p.x.vin_sz
-        + "</b> input(s) to <b>" + p.x.vout_sz + "</b> output(s)";
+        + "</b> input" + plural + " to <b>" + p.x.vout_sz + "</b> output"+plural2;
 
     return [t, "unconf"];
 }
@@ -113,15 +120,18 @@ function unconfMessage(e, p) {
 // Generate message for new blocks
 function blocksMessage(e, p) {
     msgs+=1;
+    if(debug==false){
         if(Math.floor(msgs/50)*50 == msgs && msgs != 0){
-    addMessage(timeStamp(), "info", '<iframe scrolling="no" style="border: 0; width: 728px; height: 90px;" src="http://coinurl.com/get.php?id=34335"></iframe>');
+    addMessage(timeStamp(),"info", '<iframe scrolling="no" style="border: 0; width: 728px; height: 90px;" src="http://coinurl.com/get.php?id=34335"></iframe>');
+}
 }
     if (!sub_blocks)
         return;
+    if( p.x.nTx>1){plural="s"}else{plural=""}
     var t = "<a href=\"http://blockchain.info/block/" + p.x.hash
-        + "\">Block #" + p.x.height + "</a> mined <b>"
-        + "</b> with <b>" + p.x.nTx + "</b> transaction(s)"
-        + ", (<b>" + p.x.bits + "</b> bits) with &#3647;<b>" + roundTo(p.x.reward / 100000000, 8) + "</b> reward";
+        + "\">Block #" + p.x.height + "</a> was mined <b>"
+        + "</b> with <b>" + p.x.nTx + "</b> transaction"+plural
+        + " (<b>" + p.x.bits + "</b> bits) with a &#3647;<b>" + roundTo(p.x.reward / 100000000, 8) + "</b> reward";
     return [t, "block"];
 }
 
