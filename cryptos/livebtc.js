@@ -13,6 +13,7 @@ var alertSounds = ["","../sounds/pling.wav","../sounds/pling2.wav","../sounds/pl
 var btcusd=0;
 var msgs = 0;
 
+var prevMsg;
 
 var ads = {};
 ads.enabled=false;
@@ -96,20 +97,17 @@ function addressMessage(e, p, adr) {
                     name=addr_nicks[i][1]
                 }else{
                     name=adr;
-                }
-
-            }
-
-        };
-            var t = "<a href=\"http://blockchain.info/tx/" + p.x.hash
+                }}};
+        var snd = new Audio(alertSounds[alertSound]);
+        snd.play();
+        var t = "<a href=\"http://blockchain.info/tx/" + p.x.hash
         + "\">Transaction " + sh + "</a> outgoing from "
         + "subscribed address <a target='_blank' href=\"http://blockchain.info/address/" + adr + "\">"
         + name + "</a> "
         + "sent &#3647;<b>" + roundTo(btc / 100000000, 8)
         + "</b> from <b>" + p.x.vin_sz
         + "</b> input" + plural + " to <b>" + p.x.vout_sz + "</b> output"+plural2;
-        var snd = new Audio(alertSounds[alertSound]);
-        snd.play();
+        
         return [t, "address"];
     }
 
@@ -204,7 +202,10 @@ function createSocket() {
 
         var text = tmp[0];
         var cls = tmp[1];
-        addMessage(timeStamp(), cls, text);
+        if(tmp != prevMsg){
+            addMessage(timeStamp(), cls, text);
+        }else{console.log("Blocked double msg");}
+        prevMsg=tmp;
     };
     connection.onclose = function(e) {
         setTimeout(createSocket, 300);
