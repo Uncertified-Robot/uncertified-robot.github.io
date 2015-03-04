@@ -1,6 +1,9 @@
 var sub_unconf = false;
 var sub_addresses = [];
 var sub_blocks = false;
+var addr_nicks = [];
+addr_nicks.push();
+
 
 var connection;
 var ticker;
@@ -12,7 +15,7 @@ var msgs = 0;
 
 
 var ads = {};
-ads.enabled=true;
+ads.enabled=false;
 ads.frequency=100;
 ads.ad='<iframe scrolling="no" style="border: 0; width: 728px; height: 90px;" src="http://coinurl.com/get.php?id=34335"></iframe>';
 
@@ -74,11 +77,10 @@ function dispatchTransaction(e, p) {
 // Generate message to and from an adress inside sub_addresses
 function addressMessage(e, p, adr) {
     msgs+=1;
-    if(ads.enabled==true){
-        if(Math.floor(msgs/ads.frequency)*ads.frequency == msgs && msgs != 0){
-            addMessage(timeStamp(),"info", ads.ad);
-        }
+    if(ads.enabled==true && Math.floor(msgs/ads.frequency)*ads.frequency == msgs && msgs != 0){
+        addMessage(timeStamp(),"info", ads.ad);
     }
+    
     var sh = p.x.hash.substr(0,5) + "&hellip;" + p.x.hash.substr(-5,5);
 
     var btc=0;
@@ -86,11 +88,23 @@ function addressMessage(e, p, adr) {
         btc+=p.x.inputs[i].prev_out.value;
     };
     if(p.x.vin_sz > 1){plural="s"}else{plural=""}
-        if(p.x.vout_sz > 1){plural2="s"}else{plural2=""}    
+        if(p.x.vout_sz > 1){plural2="s"}else{plural2=""}   
+            var name;
+        for (var i = 0; i < addr_nicks.length; i++) {
+            if(addr_nicks[i][0]==adr){
+                if(addr_nicks[i][1] != null){
+                    name=addr_nicks[i][1]
+                }else{
+                    name=adr;
+                }
+
+            }
+
+        };
             var t = "<a href=\"http://blockchain.info/tx/" + p.x.hash
         + "\">Transaction " + sh + "</a> outgoing from "
-        + "subscribed address <a href=\"http://blockchain.info/address/" + adr + "\">"
-        + adr + "</a> "
+        + "subscribed address <a target='_blank' href=\"http://blockchain.info/address/" + adr + "\">"
+        + name + "</a> "
         + "sent &#3647;<b>" + roundTo(btc / 100000000, 8)
         + "</b> from <b>" + p.x.vin_sz
         + "</b> input" + plural + " to <b>" + p.x.vout_sz + "</b> output"+plural2;
@@ -102,11 +116,10 @@ function addressMessage(e, p, adr) {
 // Generate message for new unconfirmed transactions
 function unconfMessage(e, p) {
     msgs+=1;
-    if(ads.enabled=true){
-        if(Math.floor(msgs/ads.frequency)*ads.frequency == msgs && msgs != 0){
-            addMessage(timeStamp(),"info", ads.ad);
-        }
+    if(ads.enabled==true && Math.floor(msgs/ads.frequency)*ads.frequency == msgs && msgs != 0){
+        addMessage(timeStamp(),"info", ads.ad);
     }
+
     if (!sub_unconf)
         return;
     var sh = p.x.hash.substr(0,5) + "&hellip;" + p.x.hash.substr(-5,5);
@@ -128,10 +141,8 @@ function unconfMessage(e, p) {
 // Generate message for new blocks
 function blocksMessage(e, p) {
     msgs+=1;
-    if(ads.enabled==true){
-        if(Math.floor(msgs/ads.frequency)*ads.frequency == msgs && msgs != 0){
-            addMessage(timeStamp(),"info", ads.ad);
-        }
+    if(ads.enabled==true && Math.floor(msgs/ads.frequency)*ads.frequency == msgs && msgs != 0){
+        addMessage(timeStamp(),"info", ads.ad);
     }
     if (!sub_blocks)
         return;
@@ -227,11 +238,13 @@ function updateSubs() {
         }
         $("#subbut_address").text("Address (" + sub_addresses.length + ")");
         $("#subbut_address").css({"text-decoration": "underline"});
+        
     }
     else {
         $("#subbut_address").text("Address");
         $("#subbut_address").css({"text-decoration": "none"});
     }
+    printSubbedAddr();
 
 }
 
@@ -243,8 +256,15 @@ $(function(e) {
         sub_unconf = livebtc.sub_unconf;
         sub_addresses = livebtc.sub_addresses;
         sub_blocks = livebtc.sub_blocks;
+        addr_nicks = livebtc.addr_nicks;
     }
+    /*
+    if(addr_nicks === undefined){
+        for (var i = sub_addresses.length - 1; i >= 0; i--) {
+            addr_nicks[sub_addresses[i]]="";
+        };
 
+    }*/
     createSocket();
     addMessage(timeStamp(), "success", "Connected successfully");
 
@@ -271,6 +291,7 @@ $(function(e) {
         for (var i = 0; i < sub_addresses.length; i++) {
             if (sub_addresses[i].substr(0, adr.length) == adr) {
                 addMessage(timeStamp(), "info", "Unsubscribed from address " + sub_addresses[i]);
+                addr_nicks.splice(i,1);
                 sub_addresses.splice(i, 1);
                 i--;
                 rm = true;
@@ -280,6 +301,7 @@ $(function(e) {
             if (adr.length != 34)
                 return;
             sub_addresses.push(adr);
+            addr_nicks.push([adr,null])
             addMessage(timeStamp(), "info", "Subscribed to address " + adr);
         }
         updateSubs();
@@ -293,6 +315,8 @@ $(function(e) {
             addMessage(timeStamp(), "info", "Removed subscription to new blocks");
         updateSubs();
     });
+
+    rateboxGetRate();
 });
 
 $(window).bind("unload", function() {
@@ -301,26 +325,71 @@ $(window).bind("unload", function() {
         var livebtc = {
             sub_blocks: sub_blocks,
             sub_addresses: sub_addresses,
-            sub_unconf: sub_unconf
+            sub_unconf: sub_unconf,
+            addr_nicks: addr_nicks
         };
         localStorage.livebtc = JSON.stringify(livebtc);
     }
     
 });
 
-rateboxGetRate = function() {
+function rateboxGetRate() {
         // Thanks to nyg for this trick - https://github.com/nyg/bitstamp-ticker/blob/master/bitstamp.js
         var api_url = 'https://www.bitstamp.net/api/ticker/';
         var yql_url = 'http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%3D"' + api_url + '"&format=json&callback=?';
         
         $.getJSON(yql_url, function (jsonp) {
-          var ticker = $.parseJSON(jsonp.query.results.body.p);
-          if (ticker) {
-            $("#rate").html(parseFloat(ticker.last).toFixed(2));
-        } else {
-            rateboxTimeout = setTimeout(rateboxGetRate, 3000);
-        }
+            var rate = $.parseJSON(jsonp.query.results.body.p);
+            if (rate) {
+                $("#rate").html(parseFloat(rate.last).toFixed(2));
+            //} else {
+                rateboxTimeout = setTimeout(rateboxGetRate, 5000);
+            }
     });
+};
+
+function setNick(id){
+    for (var i = 0; i < addr_nicks.length; i++) {
+        if(addr_nicks[i][0]==id){
+            addr_nicks[i][1]=$("#"+id).val();
+
+        }
     };
-    rateboxGetRate();
+
+}
+
+function printSubbedAddr(){
+    var subBox = $("#subTable");
+    subBox.html("<tr><th id=\"addr\">Address</th><th>Nickname</th></tr>");/*<th>Balance</th></tr>");*/
+    
+    
+    for(var i = 0; i < sub_addresses.length;i++){(function(i){
+        
+       /* 
+        var api_url = 'https://blockchain.info/address/' + sub_addresses[i] + '?format=json';
+        var yql_url = 'http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%3D"' + api_url + '"&format=json&callback=';
+
+        $.getJSON(yql_url, function (jsonp) {*/
+            var curNick = addr_nicks[i];
+            /*var response = $.parseJSON(jsonp.query.results.body.p);
+            var balance = parseFloat(response.final_balance).toFixed(2);*/
+            var nick;
+            if(curNick[1]==null){
+                nick="";
+            }else{
+                nick=curNick[1];
+            }
+
+            $("#subTable").append("<tr><td id=\"addr\">"+
+            curNick[0] + "</td><td><input id='" + 
+            curNick[0] + "' style='width:100%;height:100%;background:inherit;border:0px;' onchange='setNick(\"" + 
+            curNick[0] + "\")' type='text' value='"+
+            nick + "'/></td></tr>");//<td>
+            /*balance/100000000 + " BTC</td></tr>");
+        });*/
+
+})(i);
+
+    }
+}
 
